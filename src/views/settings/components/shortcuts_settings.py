@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 
 class ShortcutsSettingsWidget(QWidget):
     """
-    快捷键设置组件.
+    Composant de configuration des raccourcis.
     """
 
     # 信号定义
@@ -32,63 +32,63 @@ class ShortcutsSettingsWidget(QWidget):
 
     def init_ui(self):
         """
-        初始化UI.
+        Initialise l'interface utilisateur.
         """
         layout = QVBoxLayout()
 
-        # 启用快捷键选项
-        self.enable_checkbox = QCheckBox("启用全局快捷键")
+        # Option d'activation des raccourcis
+        self.enable_checkbox = QCheckBox("Activer les raccourcis globaux")
         self.enable_checkbox.setChecked(self.shortcuts_config.get("ENABLED", True))
         self.enable_checkbox.toggled.connect(self.on_settings_changed)
         layout.addWidget(self.enable_checkbox)
 
-        # 快捷键配置组
-        shortcuts_group = QGroupBox("快捷键配置")
+        # Groupe de configuration des raccourcis
+        shortcuts_group = QGroupBox("Configuration des raccourcis")
         shortcuts_layout = QVBoxLayout()
 
-        # 创建各个快捷键配置控件
+        # Créer les widgets de configuration pour chaque raccourci
         self.shortcut_widgets = {}
 
-        # 按住说话
+        # Appuyer pour parler
         self.shortcut_widgets["MANUAL_PRESS"] = self.create_shortcut_config(
-            "按住说话", self.shortcuts_config.get("MANUAL_PRESS", {})
+            "Appuyer pour parler", self.shortcuts_config.get("MANUAL_PRESS", {})
         )
         shortcuts_layout.addWidget(self.shortcut_widgets["MANUAL_PRESS"])
 
-        # 自动对话
+        # Conversation automatique
         self.shortcut_widgets["AUTO_TOGGLE"] = self.create_shortcut_config(
-            "自动对话", self.shortcuts_config.get("AUTO_TOGGLE", {})
+            "Conversation automatique", self.shortcuts_config.get("AUTO_TOGGLE", {})
         )
         shortcuts_layout.addWidget(self.shortcut_widgets["AUTO_TOGGLE"])
 
-        # 中断对话
+        # Interrompre la conversation
         self.shortcut_widgets["ABORT"] = self.create_shortcut_config(
-            "中断对话", self.shortcuts_config.get("ABORT", {})
+            "Interrompre la conversation", self.shortcuts_config.get("ABORT", {})
         )
         shortcuts_layout.addWidget(self.shortcut_widgets["ABORT"])
 
-        # 模式切换
+        # Changer de mode
         self.shortcut_widgets["MODE_TOGGLE"] = self.create_shortcut_config(
-            "模式切换", self.shortcuts_config.get("MODE_TOGGLE", {})
+            "Changer de mode", self.shortcuts_config.get("MODE_TOGGLE", {})
         )
         shortcuts_layout.addWidget(self.shortcut_widgets["MODE_TOGGLE"])
 
-        # 窗口显示/隐藏
+        # Afficher/Masquer la fenêtre
         self.shortcut_widgets["WINDOW_TOGGLE"] = self.create_shortcut_config(
-            "窗口显示/隐藏", self.shortcuts_config.get("WINDOW_TOGGLE", {})
+            "Afficher/Masquer la fenêtre", self.shortcuts_config.get("WINDOW_TOGGLE", {})
         )
         shortcuts_layout.addWidget(self.shortcut_widgets["WINDOW_TOGGLE"])
 
         shortcuts_group.setLayout(shortcuts_layout)
         layout.addWidget(shortcuts_group)
 
-        # 按钮区域
+        # Zone de boutons
         btn_layout = QHBoxLayout()
-        self.reset_btn = QPushButton("恢复默认")
+        self.reset_btn = QPushButton("Réinitialiser")
         self.reset_btn.clicked.connect(self.reset_to_defaults)
         btn_layout.addWidget(self.reset_btn)
 
-        self.apply_btn = QPushButton("应用")
+        self.apply_btn = QPushButton("Appliquer")
         self.apply_btn.clicked.connect(self.apply_settings)
         btn_layout.addWidget(self.apply_btn)
 
@@ -97,15 +97,15 @@ class ShortcutsSettingsWidget(QWidget):
 
     def create_shortcut_config(self, title, config):
         """
-        创建单个快捷键配置控件.
+        Crée un widget de configuration de raccourci.
         """
         widget = QWidget()
         layout = QHBoxLayout()
 
-        # 标题
+        # Titre
         layout.addWidget(QLabel(f"{title}:"))
 
-        # 修饰键选择
+        # Sélection du modificateur
         modifier_combo = QComboBox()
         modifier_combo.addItems(["Ctrl", "Alt", "Shift"])
         current_modifier = config.get("modifier", "ctrl").title()
@@ -113,7 +113,7 @@ class ShortcutsSettingsWidget(QWidget):
         modifier_combo.currentTextChanged.connect(self.on_settings_changed)
         layout.addWidget(modifier_combo)
 
-        # 按键选择
+        # Sélection de la touche
         key_combo = QComboBox()
         key_combo.addItems([chr(i) for i in range(ord("a"), ord("z") + 1)])  # a-z
         current_key = config.get("key", "j").lower()
@@ -128,13 +128,13 @@ class ShortcutsSettingsWidget(QWidget):
 
     def on_settings_changed(self):
         """
-        设置变更回调.
+        Rappel lors d'un changement de configuration.
         """
         self.settings_changed.emit()
 
     def apply_settings(self):
         """
-        应用设置.
+        Applique les paramètres.
         """
         try:
             # 更新启用状态
@@ -154,16 +154,16 @@ class ShortcutsSettingsWidget(QWidget):
             self.config.reload_config()
             self.shortcuts_config = self.config.get_config("SHORTCUTS", {})
 
-            logger.info("快捷键设置已保存")
+            logger.info("Paramètres des raccourcis sauvegardés")
 
         except Exception as e:
-            logger.error(f"保存快捷键设置失败: {e}")
+            logger.error(f"Échec de l'enregistrement des raccourcis : {e}")
 
     def reset_to_defaults(self):
         """
-        恢复默认设置.
+        Restaure les paramètres par défaut.
         """
-        # 默认配置
+        # Configuration par défaut
         defaults = {
             "ENABLED": True,
             "MANUAL_PRESS": {"modifier": "ctrl", "key": "j"},
@@ -173,7 +173,7 @@ class ShortcutsSettingsWidget(QWidget):
             "WINDOW_TOGGLE": {"modifier": "ctrl", "key": "w"},
         }
 
-        # 更新UI
+        # Mettre à jour l'UI
         self.enable_checkbox.setChecked(defaults["ENABLED"])
 
         for key, config in defaults.items():
@@ -185,5 +185,5 @@ class ShortcutsSettingsWidget(QWidget):
                 widget.modifier_combo.setCurrentText(config["modifier"].title())
                 widget.key_combo.setCurrentText(config["key"].lower())
 
-        # 触发变更信号
+        # Déclencher le signal de changement
         self.on_settings_changed()

@@ -21,7 +21,7 @@ from src.views.settings.components.shortcuts_settings import ShortcutsSettingsWi
 
 class SettingsWindow(QDialog):
     """
-    参数配置窗口.
+    Fenêtre de configuration des paramètres.
     """
 
     def __init__(self, parent=None):
@@ -42,7 +42,7 @@ class SettingsWindow(QDialog):
 
     def _setup_ui(self):
         """
-        设置UI界面.
+        Configure l'interface utilisateur.
         """
         try:
             from PyQt5 import uic
@@ -57,43 +57,43 @@ class SettingsWindow(QDialog):
             self._add_shortcuts_tab()
 
         except Exception as e:
-            self.logger.error(f"设置UI失败: {e}", exc_info=True)
+            self.logger.error(f"Échec de la configuration de l'UI : {e}", exc_info=True)
             raise
 
     def _add_shortcuts_tab(self):
         """
-        添加快捷键设置选项卡.
+        Ajoute l'onglet de configuration des raccourcis.
         """
         try:
             # 获取TabWidget
             tab_widget = self.findChild(QTabWidget, "tabWidget")
             if not tab_widget:
-                self.logger.error("未找到TabWidget控件")
+                self.logger.error("Contrôle TabWidget introuvable")
                 return
 
-            # 创建快捷键设置组件
+            # Crée le composant de configuration des raccourcis
             self.shortcuts_tab = ShortcutsSettingsWidget()
 
-            # 添加到选项卡
-            tab_widget.addTab(self.shortcuts_tab, "快捷键")
+            # Ajoute à l'onglet
+            tab_widget.addTab(self.shortcuts_tab, "Raccourcis")
 
             # 连接信号
             self.shortcuts_tab.settings_changed.connect(self._on_settings_changed)
 
-            self.logger.debug("成功添加快捷键设置选项卡")
+            self.logger.debug("Onglet de raccourcis ajouté avec succès")
 
         except Exception as e:
-            self.logger.error(f"添加快捷键设置选项卡失败: {e}", exc_info=True)
+            self.logger.error(f"Échec de l'ajout de l'onglet de raccourcis : {e}", exc_info=True)
 
     def _on_settings_changed(self):
         """
-        设置变更回调.
+        Rappel lors d'un changement de paramètre.
         """
-        # 可以在此添加一些提示或者其他逻辑
+        # Des informations ou autres logiques peuvent être ajoutées ici
 
     def _get_ui_controls(self):
         """
-        获取UI控件引用.
+        Obtient les références des contrôles UI.
         """
         # 系统选项控件
         self.ui_controls.update(
@@ -164,7 +164,7 @@ class SettingsWindow(QDialog):
 
     def _connect_events(self):
         """
-        连接事件处理.
+        Connecte les gestionnaires d'événements.
         """
         if self.ui_controls["save_btn"]:
             self.ui_controls["save_btn"].clicked.connect(self._on_save_clicked)
@@ -182,7 +182,7 @@ class SettingsWindow(QDialog):
 
     def _load_config_values(self):
         """
-        从配置文件加载值到UI控件.
+        Charge les valeurs de configuration dans les contrôles UI.
         """
         try:
             # 系统选项
@@ -318,7 +318,7 @@ class SettingsWindow(QDialog):
 
     def _on_save_clicked(self):
         """
-        保存按钮点击事件.
+        Événement clic sur le bouton Enregistrer.
         """
         try:
             # 收集所有配置数据
@@ -328,8 +328,8 @@ class SettingsWindow(QDialog):
                 # 显示保存成功并提示重启
                 reply = QMessageBox.question(
                     self,
-                    "配置保存成功",
-                    "配置已保存成功！\n\n为了使配置生效，建议重启软件。\n是否现在重启？",
+                    "Configuration enregistrée",
+                    "La configuration a été enregistrée !\n\nPour appliquer les modifications, il est recommandé de redémarrer le logiciel.\nVoulez-vous redémarrer maintenant ?",
                     QMessageBox.Yes | QMessageBox.No,
                     QMessageBox.Yes,
                 )
@@ -339,15 +339,21 @@ class SettingsWindow(QDialog):
                 else:
                     self.accept()
             else:
-                QMessageBox.warning(self, "错误", "配置保存失败，请检查输入的值。")
+                QMessageBox.warning(
+                    self,
+                    "Erreur",
+                    "Échec de l'enregistrement de la configuration, vérifiez les valeurs saisies.",
+                )
 
         except Exception as e:
-            self.logger.error(f"保存配置失败: {e}", exc_info=True)
-            QMessageBox.critical(self, "错误", f"保存配置时发生错误: {str(e)}")
+            self.logger.error(f"Échec de l'enregistrement de la configuration : {e}", exc_info=True)
+            QMessageBox.critical(
+                self, "Erreur", f"Une erreur est survenue lors de l'enregistrement : {str(e)}"
+            )
 
     def _save_all_config(self) -> bool:
         """
-        保存所有配置.
+        Enregistre toutes les configurations.
         """
         try:
             # 系统选项 - 网络配置
@@ -464,21 +470,23 @@ class SettingsWindow(QDialog):
             existing_camera.update(camera_config)
             self.config_manager.update_config("CAMERA", existing_camera)
 
-            self.logger.info("配置保存成功")
+            self.logger.info("Configuration enregistrée avec succès")
             return True
 
         except Exception as e:
-            self.logger.error(f"保存配置时出错: {e}", exc_info=True)
+            self.logger.error(
+                f"Erreur lors de l'enregistrement de la configuration : {e}", exc_info=True
+            )
             return False
 
     def _on_reset_clicked(self):
         """
-        重置按钮点击事件.
+        Événement clic sur le bouton Réinitialiser.
         """
         reply = QMessageBox.question(
             self,
-            "确认重置",
-            "确定要重置所有配置为默认值吗？\n这将清除当前的所有设置。",
+            "Confirmer la réinitialisation",
+            "Voulez-vous vraiment réinitialiser tous les paramètres par défaut ?\nCela effacera toutes les configurations actuelles.",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
         )
@@ -488,7 +496,7 @@ class SettingsWindow(QDialog):
 
     def _reset_to_defaults(self):
         """
-        重置为默认值.
+        Rétablit les valeurs par défaut.
         """
         try:
             # 获取默认配置
@@ -543,15 +551,15 @@ class SettingsWindow(QDialog):
             self._set_text_value("vl_api_key_edit", camera_config["VLapi_key"])
             self._set_text_value("models_edit", camera_config["models"])
 
-            self.logger.info("配置已重置为默认值")
+            self.logger.info("Configuration réinitialisée aux valeurs par défaut")
 
         except Exception as e:
-            self.logger.error(f"重置配置失败: {e}", exc_info=True)
-            QMessageBox.critical(self, "错误", f"重置配置时发生错误: {str(e)}")
+            self.logger.error(f"Échec de la réinitialisation de la configuration : {e}", exc_info=True)
+            QMessageBox.critical(self, "Erreur", f"Une erreur est survenue lors de la réinitialisation : {str(e)}")
 
     def _on_model_path_browse(self):
         """
-        浏览模型路径.
+        Parcourt le chemin du modèle.
         """
         try:
             current_path = self._get_text_value("model_path_edit")
@@ -566,23 +574,23 @@ class SettingsWindow(QDialog):
                     current_path = str(project_root / "models")
 
             selected_path = QFileDialog.getExistingDirectory(
-                self, "选择模型目录", current_path
+                self, "Choisir le répertoire du modèle", current_path
             )
 
             if selected_path:
                 self._set_text_value("model_path_edit", selected_path)
-                self.logger.info(f"已选择模型路径: {selected_path}")
+                self.logger.info(f"Chemin du modèle sélectionné : {selected_path}")
 
         except Exception as e:
-            self.logger.error(f"浏览模型路径失败: {e}", exc_info=True)
-            QMessageBox.warning(self, "错误", f"浏览模型路径时发生错误: {str(e)}")
+            self.logger.error(f"Échec lors de la sélection du chemin du modèle : {e}", exc_info=True)
+            QMessageBox.warning(self, "Erreur", f"Une erreur est survenue lors de la sélection du chemin du modèle : {str(e)}")
 
     def _restart_application(self):
         """
-        重启应用程序.
+        Redémarre l'application.
         """
         try:
-            self.logger.info("用户选择重启应用程序")
+            self.logger.info("L'utilisateur a choisi de redémarrer l'application")
 
             # 关闭设置窗口
             self.accept()
@@ -591,14 +599,16 @@ class SettingsWindow(QDialog):
             self._direct_restart()
 
         except Exception as e:
-            self.logger.error(f"重启应用程序失败: {e}", exc_info=True)
+            self.logger.error(f"Échec du redémarrage de l'application : {e}", exc_info=True)
             QMessageBox.warning(
-                self, "重启失败", "自动重启失败，请手动重启软件以使配置生效。"
+                self,
+                "Échec du redémarrage",
+                "Le redémarrage automatique a échoué, veuillez redémarrer le logiciel manuellement pour appliquer la configuration.",
             )
 
     def _direct_restart(self):
         """
-        直接重启程序.
+        Redémarre le programme directement.
         """
         try:
             import os
@@ -609,7 +619,7 @@ class SettingsWindow(QDialog):
             script = sys.argv[0]
             args = sys.argv[1:]
 
-            self.logger.info(f"重启命令: {python} {script} {' '.join(args)}")
+            self.logger.info(f"Commande de redémarrage : {python} {script} {' '.join(args)}")
 
             # 关闭当前应用
             from PyQt5.QtWidgets import QApplication
@@ -625,16 +635,16 @@ class SettingsWindow(QDialog):
                 os.execv(python, [python, script] + args)
 
         except Exception as e:
-            self.logger.error(f"直接重启失败: {e}", exc_info=True)
+            self.logger.error(f"Échec du redémarrage direct : {e}", exc_info=True)
 
     def _load_keywords_from_file(self) -> str:
         """
-        从 keywords.txt 文件加载唤醒词，按完整格式显示.
+        Charge les mots de réveil depuis keywords.txt en conservant le format complet.
         """
         try:
             keywords_file = get_project_root() / "models" / "keywords.txt"
             if not keywords_file.exists():
-                self.logger.warning(f"关键词文件不存在: {keywords_file}")
+                self.logger.warning(f"Fichier de mots-clés introuvable: {keywords_file}")
                 return ""
 
             keywords = []
@@ -648,12 +658,12 @@ class SettingsWindow(QDialog):
             return "\n".join(keywords)
 
         except Exception as e:
-            self.logger.error(f"读取关键词文件失败: {e}")
+            self.logger.error(f"Échec de la lecture du fichier de mots-clés: {e}")
             return ""
 
     def _save_keywords_to_file(self, keywords_text: str):
         """
-        保存唤醒词到 keywords.txt 文件，支持完整格式.
+        Enregistre les mots de réveil dans keywords.txt en conservant le format complet.
         """
         try:
             keywords_file = get_project_root() / "models" / "keywords.txt"
@@ -670,36 +680,36 @@ class SettingsWindow(QDialog):
                     processed_lines.append(line)
                 else:
                     # 只有中文，没有拼音 - 标记为无效
-                    processed_lines.append(f"# 无效：缺少拼音格式 - {line}")
+                    processed_lines.append(f"# Invalide : format pinyin manquant - {line}")
                     has_invalid_lines = True
                     self.logger.warning(
-                        f"关键词 '{line}' 缺少拼音，需要格式：拼音 @中文"
+                        f"mot-clé '{line}' manque le pinyin, format requis : pinyin @chinois"
                     )
 
             # 写入文件
             with open(keywords_file, "w", encoding="utf-8") as f:
                 f.write("\n".join(processed_lines) + "\n")
 
-            self.logger.info(f"成功保存关键词到 {keywords_file}")
+            self.logger.info(f"Mots-clés enregistrés dans {keywords_file}")
 
-            # 如果有无效格式，提示用户
+            # Si des formats invalides sont détectés, avertir l'utilisateur
             if has_invalid_lines:
                 QMessageBox.warning(
                     self,
-                    "格式错误",
-                    "检测到无效的关键词格式！\n\n"
-                    "正确格式：拼音 @中文\n"
-                    "示例：x iǎo ài t óng x ué @小爱同学\n\n"
-                    "无效的行已被注释，请手动修正后重新保存。",
+                    "Format incorrect",
+                    "Format de mot-clé invalide détecté !\n\n"
+                    "Format correct : pinyin @chinois\n"
+                    "Exemple : x iǎo ài t óng x ué @小爱同学\n\n"
+                    "Les lignes invalides ont été commentées, veuillez corriger manuellement puis sauvegarder à nouveau.",
                 )
 
         except Exception as e:
-            self.logger.error(f"保存关键词文件失败: {e}")
-            QMessageBox.warning(self, "错误", f"保存关键词失败: {str(e)}")
+            self.logger.error(f"Échec de l'enregistrement du fichier de mots-clés : {e}")
+            QMessageBox.warning(self, "Erreur", f"Échec de l'enregistrement des mots-clés : {str(e)}")
 
     def _get_default_keywords(self) -> str:
         """
-        获取默认关键词列表，完整格式.
+        Obtient la liste par défaut des mots de réveil, format complet.
         """
         default_keywords = [
             "x iǎo ài t óng x ué @小爱同学",
@@ -713,7 +723,7 @@ class SettingsWindow(QDialog):
 
     def closeEvent(self, event):
         """
-        窗口关闭事件.
+        Événement de fermeture de la fenêtre.
         """
-        self.logger.debug("设置窗口已关闭")
+        self.logger.debug("Fenêtre de paramètres fermée")
         super().closeEvent(event)
