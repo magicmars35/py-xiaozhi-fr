@@ -1,5 +1,5 @@
 """
-系统托盘组件模块 提供系统托盘图标、菜单和状态指示功能.
+Module de barre système fournissant l'icône de la barre, le menu et l'indication d'état.
 """
 
 from typing import Optional
@@ -13,7 +13,7 @@ from src.utils.logging_config import get_logger
 
 class SystemTray(QObject):
     """
-    系统托盘组件.
+    Composant de la barre système.
     """
 
     # 定义信号
@@ -40,12 +40,12 @@ class SystemTray(QObject):
 
     def _setup_tray(self):
         """
-        设置系统托盘图标.
+        Configure l'icône de la barre système.
         """
         try:
             # 检查系统是否支持系统托盘
             if not QSystemTrayIcon.isSystemTrayAvailable():
-                self.logger.warning("系统不支持系统托盘功能")
+                self.logger.warning("Le système ne prend pas en charge la barre système")
                 return
 
             # 创建托盘菜单
@@ -68,69 +68,72 @@ class SystemTray(QObject):
 
             # 显示系统托盘图标
             self.tray_icon.show()
-            self.logger.info("系统托盘图标已初始化")
+            self.logger.info("Icône de la barre système initialisée")
 
         except Exception as e:
-            self.logger.error(f"初始化系统托盘图标失败: {e}", exc_info=True)
+            self.logger.error(
+                f"Échec de l'initialisation de l'icône de barre système : {e}",
+                exc_info=True,
+            )
 
     def _create_tray_menu(self):
         """
-        创建托盘右键菜单.
+        Crée le menu contextuel de la barre système.
         """
         self.tray_menu = QMenu()
 
-        # 添加显示主窗口菜单项
-        show_action = QAction("显示主窗口", self.parent_widget)
+        # Élément de menu pour afficher la fenêtre principale
+        show_action = QAction("Afficher la fenêtre principale", self.parent_widget)
         show_action.triggered.connect(self._on_show_window)
         self.tray_menu.addAction(show_action)
 
         # 添加分隔线
         self.tray_menu.addSeparator()
 
-        # 添加设置菜单项
-        settings_action = QAction("参数配置", self.parent_widget)
+        # Élément de menu des paramètres
+        settings_action = QAction("Paramètres", self.parent_widget)
         settings_action.triggered.connect(self._on_settings)
         self.tray_menu.addAction(settings_action)
 
         # 添加分隔线
         self.tray_menu.addSeparator()
 
-        # 添加退出菜单项
-        quit_action = QAction("退出程序", self.parent_widget)
+        # Élément de menu pour quitter
+        quit_action = QAction("Quitter le programme", self.parent_widget)
         quit_action.triggered.connect(self._on_quit)
         self.tray_menu.addAction(quit_action)
 
     def _on_tray_activated(self, reason):
         """
-        处理托盘图标点击事件.
+          Gère le clic sur l'icône de la barre système.
         """
         if reason == QSystemTrayIcon.Trigger:  # 单击
             self.show_window_requested.emit()
 
     def _on_show_window(self):
         """
-        处理显示窗口菜单项点击.
+          Gère le clic sur l'élément "Afficher la fenêtre".
         """
         self.show_window_requested.emit()
 
     def _on_settings(self):
         """
-        处理设置菜单项点击.
+          Gère le clic sur l'élément "Paramètres".
         """
         self.settings_requested.emit()
 
     def _on_quit(self):
         """
-        处理退出菜单项点击.
+          Gère le clic sur l'élément "Quitter".
         """
         self.quit_requested.emit()
 
     def update_status(self, status: str, connected: bool = True):
-        """更新托盘图标状态.
+        """Met à jour l'état de l'icône de la barre système.
 
         Args:
-            status: 状态文本
-            connected: 连接状态
+            status: texte d'état (en chinois)
+            connected: état de connexion
         """
         if not self.tray_icon:
             return
@@ -155,34 +158,46 @@ class SystemTray(QObject):
             # 设置图标
             self.tray_icon.setIcon(QIcon(pixmap))
 
-            # 设置提示文本
-            tooltip = f"小智AI助手 - {status}"
+            # Définir le texte de l'info-bulle
+            tooltip = f"Assistant IA Xiaozhi - {self._translate_status(status)}"
             self.tray_icon.setToolTip(tooltip)
 
         except Exception as e:
-            self.logger.error(f"更新系统托盘图标失败: {e}")
+            self.logger.error(
+                f"Échec de la mise à jour de l'icône de barre système : {e}"
+            )
 
     def _get_status_color(self, status: str, connected: bool) -> QColor:
-        """根据状态返回对应的颜色.
+        """Renvoie la couleur correspondant à l'état.
 
         Args:
-            status: 状态文本
-            connected: 连接状态
+            status: texte d'état
+            connected: état de connexion
 
         Returns:
-            QColor: 对应的颜色
+            QColor: couleur correspondante
         """
         if not connected:
             return QColor(128, 128, 128)  # 灰色 - 未连接
 
         if "错误" in status:
-            return QColor(255, 0, 0)  # 红色 - 错误状态
+            return QColor(255, 0, 0)  # Rouge - erreur
         elif "聆听中" in status:
-            return QColor(255, 200, 0)  # 黄色 - 聆听中状态
+            return QColor(255, 200, 0)  # Jaune - en écoute
         elif "说话中" in status:
-            return QColor(0, 120, 255)  # 蓝色 - 说话中状态
+            return QColor(0, 120, 255)  # Bleu - en train de parler
         else:
-            return QColor(0, 180, 0)  # 绿色 - 待命/已启动状态
+            return QColor(0, 180, 0)  # Vert - en attente/démarré
+
+    def _translate_status(self, status: str) -> str:
+        """Traduit les états chinois en français pour l'affichage."""
+        mapping = {
+            "待命": "En attente",
+            "聆听中": "En écoute",
+            "说话中": "En train de parler",
+            "错误": "Erreur",
+        }
+        return mapping.get(status, status)
 
     def show_message(
         self,
